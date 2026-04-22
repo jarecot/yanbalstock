@@ -201,6 +201,17 @@
     </div>
 
     <div class="fg"><label>Nombre del Producto *</label><input type="text" id="fName" /></div>
+
+    <div class="form-group" style="margin-bottom: 15px;">
+  <label style="display:block; margin-bottom:5px; font-weight:600;">Categoría</label>
+  <select id="pCategory" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
+    <option value="Perfumes">Perfumes</option>
+    <option value="Maquillaje">Maquillaje</option>
+    <option value="Cuidado del Rostro">Cuidado del Rostro</option>
+    <option value="Cuidado del Cuerpo">Cuidado del Cuerpo</option>
+    <option value="Joyería">Joyería</option>
+  </select>
+</div>
     
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
       <div class="fg"><label>Precio de Venta ($) *</label><input type="number" id="fPrice" placeholder="Precio final al cliente" /></div>
@@ -513,6 +524,7 @@
     const name = document.getElementById('fName').value.trim();
     const price = parseFloat(document.getElementById('fPrice').value);
     const stock = parseInt(document.getElementById('fStock').value);
+    const category = document.getElementById('pCategory').value;
     
     if(!name || isNaN(price) || isNaN(stock)) {
       alert("Por favor completa Nombre, Precio y Stock.");
@@ -522,6 +534,7 @@
     const data = {
       name,
       price,
+      category,
       originalPrice: parseFloat(document.getElementById('fOriginalPrice').value) || null,
       stock,
       description: document.getElementById('fDesc').value,
