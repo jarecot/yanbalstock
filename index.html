@@ -25,17 +25,17 @@
     /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(250,247,244,0.92); backdrop-filter: blur(12px);
+      background: rgba(250,247,244,0.96); backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--gold-light); padding: 0 5%;
-      display: flex; align-items: center; justify-content: space-between; height: 72px;
+      display: flex; align-items: center; justify-content: space-between; height: 92px;
     }
-    .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-brand { display: flex; align-items: center; gap: 16px; text-decoration: none; }
     .nav-logo {
       width: 42px; height: 42px; background: linear-gradient(135deg, var(--rose), var(--gold));
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
       color: white; font-size: 20px; font-family: 'Cormorant Garamond', serif; font-weight: 600; font-style: italic;
     }
-    .nav-brand-text { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--charcoal); letter-spacing: 0.02em; }
+    .nav-brand-text { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 600; color: var(--charcoal); letter-spacing: 0.02em; }
     .nav-brand-sub { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-family: 'DM Sans', sans-serif; font-weight: 500; display: block; line-height: 1.2; }
     .nav-right { display: flex; align-items: center; gap: 16px; }
     .nav-search {
@@ -51,53 +51,98 @@
 
     /* ── HERO ── */
     .hero {
-      background: linear-gradient(135deg, #1a0f0d 0%, #2d1a16 40%, #3d2820 100%); color: white;
-      padding: 80px 5% 70px; display: flex; align-items: center; justify-content: space-between;
-      gap: 40px; position: relative; overflow: hidden;
-    }
-    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 50%, rgba(201,115,106,0.2) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(201,169,110,0.15) 0%, transparent 50%); }
-    .hero-content { position: relative; max-width: 550px; }
-    .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.8rem, 6vw, 4.2rem); font-weight: 300; line-height: 1.1; margin-bottom: 16px; }
-    .hero h1 em { font-style: italic; color: var(--rose-light); }
-    .hero p { color: rgba(255,255,255,0.8); font-size: 1.15rem; line-height: 1.6; margin-bottom: 32px; }
-    
-    .catalog-wrapper { margin-top: 24px; display: none; }
-    .btn-catalog { display: inline-flex; align-items: center; gap: 10px; background: rgba(201,169,110,0.2); border: 1.5px solid rgba(201,169,110,0.8); color: var(--gold-light); border-radius: 50px; padding: 12px 24px; font-weight: 600; font-size: 1rem; text-decoration: none; transition: all 0.2s; }
-    .btn-catalog:hover { background: rgba(201,169,110,0.4); color: white; }
-    .catalog-note { display: block; font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 10px; line-height: 1.4; }
-    
-/* ANIMACION CIRCULOS*/
-    .hero {
       position: relative;
       overflow: hidden;
-      background-color: var(--cream); /* Tu color de fondo base */
-      padding: 80px 20px; /* Ajusta según tu diseño */
-      text-align: center;
+      padding: 70px 5% 60px;
+      color: white;
+      background: radial-gradient(circle at top left, rgba(255, 229, 212, 0.16), transparent 26%),
+                  radial-gradient(circle at bottom right, rgba(243, 177, 154, 0.18), transparent 22%),
+                  linear-gradient(135deg, #4a2922 0%, #693f36 40%, #8a574a 100%);
     }
-
-/* IMPORTANTE: El contenido dentro del header debe estar por encima de los círculos */
-    .hero > * {
-      position: relative;
-      z-index: 2;
-    }
-
-    /* Círculo 1 (Tono Rosa) */
     .hero::before {
-      content: "";
+      content: '';
       position: absolute;
-      top: -50px;
-      left: -10%;
-      width: 300px;
-      height: 300px;
-      background-color: var(--rose-light);
+      inset: 0;
+      background: radial-gradient(circle at 75% 30%, rgba(255,255,255,0.12), transparent 18%),
+                  radial-gradient(circle at 15% 70%, rgba(255,255,255,0.08), transparent 20%);
+      pointer-events: none;
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .hero-content { max-width: 660px; }
+    .hero-head {
+      display: block;
+      margin-bottom: 24px;
+    }
+    .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.8rem, 5vw, 4.4rem); font-weight: 300; line-height: 1.05; margin-bottom: 18px; }
+    .hero h1 em { font-style: italic; color: #f5b4a7; }
+    .hero p { color: rgba(255,255,255,0.92); font-size: 1.15rem; line-height: 1.6; margin-bottom: 28px; max-width: 520px; }
+    .catalog-wrapper { margin-top: 20px; display: none; }
+    .btn-catalog {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, #f4c7b8, #e77d68);
+      border: none;
+      color: var(--charcoal);
+      border-radius: 999px;
+      padding: 16px 32px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-decoration: none;
+      transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+      box-shadow: 0 20px 40px rgba(231,125,104,0.35);
+      overflow: hidden;
+    }
+    .btn-catalog::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.35);
+      opacity: 0.75;
+      transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .btn-catalog:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #f9d2c5, #f59f87);
+    }
+    .btn-catalog:hover::after {
+      box-shadow: 0 0 0 16px rgba(255,255,255,0.08);
+      transform: scale(1.03);
+    }
+    .catalog-note { display: block; font-size: 0.95rem; color: rgba(255,255,255,0.85); margin-top: 14px; line-height: 1.6; max-width: 440px; }
+    .hero-hover-accent {
+      position: absolute;
+      top: 45%;
+      left: 72%;
+      width: 160px;
+      height: 160px;
+      pointer-events: none;
       border-radius: 50%;
-      filter: blur(60px);
+      background: radial-gradient(circle, rgba(255,221,202,0.32) 0%, rgba(255,221,202,0.00) 55%);
+      filter: blur(12px);
+      opacity: 0.65;
+      transform: translate(-50%, -50%) scale(0.92);
+      transition: left 0.18s ease-out, top 0.18s ease-out, opacity 0.18s ease-out, transform 0.18s ease-out;
+      mix-blend-mode: screen;
       z-index: 0;
-      opacity: 0.6;
-      animation: float 8s ease-in-out infinite;
+    }
+    .hero-hover-accent::before {
+      content: '';
+      position: absolute;
+      inset: 30px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.45);
+    }
+    .hero:hover .hero-hover-accent { opacity: 0.9; }
+    @media (max-width: 860px) {
+      .hero { text-align: center; padding: 60px 5% 40px; }
+      .hero-content { margin: 0 auto; }
+      .hero-hover-accent { display: none; }
     }
 
-/* Círculo 2 (Tono Dorado) */
+    /* ANIMACION CIRCULOS*/
     .hero::after {
       content: "";
       position: absolute;
@@ -112,18 +157,10 @@
       opacity: 0.5;
       animation: float 10s ease-in-out infinite alternate-reverse;
     }
-
-/* Animación de movimiento suave */
     @keyframes float {
-      0% {
-        transform: translateY(0px) scale(1);
-      }
-      50% {
-        transform: translateY(30px) scale(1.1);
-      }
-      100% {
-        transform: translateY(0px) scale(1);
-      }
+      0% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(30px) scale(1.1); }
+      100% { transform: translateY(0px) scale(1); }
     }
 /* FIN ANIMACION CIRCULOS */    
     
@@ -138,8 +175,8 @@
     .featured-mini-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
     .featured-mini-img { width: 100%; height: 110px; border-radius: 8px; object-fit: contain; background: white; flex-shrink: 0; mix-blend-mode: multiply; }
     .featured-mini-info { width: 100%; }
-    .featured-mini-name { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; line-height: 1.2; color: var(--charcoal); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .featured-mini-price { font-size: 1.0rem; font-weight: 600; color: var(--rose); margin-top: 4px; }
+    .featured-mini-name { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; font-weight: 600; line-height: 1.2; color: var(--charcoal); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .featured-mini-price { font-size: 0.9rem; font-weight: 600; color: var(--rose); margin-top: 4px; }
 
     /* ── FILTERS ── */
     .filters-bar { padding: 24px 5%; background: white; border-bottom: 1px solid #efe8e5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -207,16 +244,16 @@
       .hero { padding: 40px 5% 30px; text-align: center; }
       .hero-content { margin: 0 auto; }
       .nav-search { display: none; }
-      .products-grid { grid-template-columns: repeat(1, 1fr); gap: 14px; }
+      .products-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
       .product-info { padding: 12px; }
-      .product-name { font-size: 1.3rem; line-height: 1.3; margin-bottom: 6px; }
-      .product-desc { font-size: 1.1rem; line-height: 1.4; }
-      .price-current { font-size: 1.8rem; font-weight: 700; }
-      .price-original { font-size: 1.3rem; }
-      .stock-text { font-size: 1rem; font-weight: 500; }
+      .product-name { font-size: 1.15rem; line-height: 1.3; margin-bottom: 6px; }
+      .product-desc { font-size: 0.92rem; line-height: 1.4; }
+      .price-current { font-size: 1.5rem; font-weight: 700; }
+      .price-original { font-size: 1rem; }
+      .stock-text { font-size: 0.92rem; font-weight: 500; }
       .btn-add { padding: 13px; font-size: 1rem; font-weight: 600; }
       .filters-bar { padding: 14px 4%; gap: 8px; }
-      .filter-btn { font-size: 1rem; padding: 9px 16px; }
+      .filter-btn { font-size: 0.92rem; padding: 9px 16px; }
       .sort-select { font-size: 0.92rem; width: 100%; margin-left: 0; }
     }
 
@@ -242,9 +279,9 @@
 
 <nav>
   <a href="#" class="nav-brand">
-    <div class="nav-logo">M</div>
+    <img src="LogoM.png" alt="Logo" style="width: 94px; height: auto; border-radius: 50%; object-fit: contain;">
     <div>
-      <span class="nav-brand-text">Tienda Online</span>
+      <span class="nav-brand-text">Maida Store</span>
       <span class="nav-brand-sub" id="navConsultantName">Tu consultora de confianza</span>
     </div>
   </a>
@@ -261,9 +298,10 @@
 
 <section class="hero">
   <div class="hero-content">
-    <h1>Bienvenida a <em>Maida Store</em></h1>
-    <p id="heroDesc">Productos seleccionados con amor. Fragancias, joyas, maquillaje y cuidado personal con precios especiales para ti.</p>
-    
+    <div class="hero-head">
+      <h1>Bienvenida a <em>Maida Store</em></h1>
+      <p id="heroDesc">Productos seleccionados con amor. Fragancias, joyas, maquillaje y cuidado personal con precios especiales para ti.</p>
+    </div>
     <div class="catalog-wrapper" id="catalogWrapper"></div>
   </div>
 </section>
@@ -376,7 +414,7 @@
         wrap.style.display = 'block';
         wrap.innerHTML = `
           <a href="https://catalogo.yanbal.com/catalogodigital/es/co/${s.catYear}/${s.catCamp}/oficial/${s.catId}" target="_blank" class="btn-catalog">
-            📖 Ver Catálogo Campaña actual
+            ✨📖 Ver Catálogo Campaña actual
           </a>
           <span class="catalog-note">Al hacer tu pedido desde el catálogo oficial, me llegará directamente a mi sistema Yanbal.</span>
         `;
@@ -405,6 +443,26 @@ let cart = JSON.parse(localStorage.getItem('yanbal_cart') || '[]');
 let currentProduct = null;
 let activeCategory = 'all';
 let searchTerm = '';
+
+const hero = document.querySelector('.hero');
+if (hero) {
+  const glow = document.createElement('div');
+  glow.className = 'hero-hover-accent';
+  hero.addEventListener('mousemove', e => {
+    const rect = hero.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    glow.style.left = `${Math.min(Math.max(x, 120), rect.width - 120)}px`;
+    glow.style.top = `${Math.min(Math.max(y, 120), rect.height - 120)}px`;
+    glow.style.transform = 'translate(-50%, -50%) scale(1)';
+  });
+
+  hero.addEventListener('mouseleave', () => {
+    glow.style.left = '72%';
+    glow.style.top = '45%';
+    glow.style.transform = 'translate(-50%, -50%) scale(0.92)';
+  });
+}
 
 function renderCategories(products) {
   // Categorías base de Yanbal en orden
