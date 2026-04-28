@@ -131,17 +131,22 @@
 
     
 
-    /* ── FEATURED SLIDER ── */
-    .featured-section { padding: 40px 5% 0; display: none; }
-    .slider-container { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; scroll-snap-type: x mandatory; scrollbar-width: thin; }
-    .slider-container::-webkit-scrollbar { height: 8px; }
-    .slider-container::-webkit-scrollbar-thumb { background: var(--rose-light); border-radius: 10px; }
-    .featured-card { min-width: 280px; scroll-snap-align: start; flex-shrink: 0; }
+    /* ── FEATURED SECTION (compact) ── */
+    .featured-section { padding: 32px 5% 0; display: none; }
+    .featured-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+    .featured-mini-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 10px; transition: transform 0.2s, box-shadow 0.2s; }
+    .featured-mini-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .featured-mini-img { width: 62px; height: 62px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--rose-pale); }
+    .featured-mini-info { flex: 1; min-width: 0; }
+    .featured-mini-name { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; font-weight: 600; line-height: 1.2; color: var(--charcoal); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .featured-mini-price { font-size: 0.9rem; font-weight: 600; color: var(--rose); margin-top: 3px; }
 
     /* ── FILTERS ── */
     .filters-bar { padding: 24px 5%; background: white; border-bottom: 1px solid #efe8e5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .filter-btn { padding: 10px 22px; border-radius: 50px; border: 1.5px solid #ddd; background: white; color: var(--charcoal); font-family: 'DM Sans', sans-serif; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
     .filter-btn:hover, .filter-btn.active { border-color: var(--rose); background: var(--rose-pale); color: var(--rose); font-weight: 500; }
+    .sort-select { margin-left: auto; padding: 9px 16px; border-radius: 50px; border: 1.5px solid #ddd; background: white; color: var(--charcoal); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; cursor: pointer; outline: none; transition: 0.2s; }
+    .sort-select:focus, .sort-select:hover { border-color: var(--rose); }
 
     /* ── PRODUCTS GRID ── */
     .products-section { padding: 40px 5%; }
@@ -188,7 +193,7 @@
     
     .modal-content { padding: 32px; display: flex; flex-direction: column; }
     .modal-name { font-size: 2rem; font-family: 'Cormorant Garamond', serif; font-weight: 600; line-height: 1.1; margin-bottom: 12px; }
-    .modal-desc { font-size: 1.05rem; color: var(--muted); line-height: 1.6; flex: 1; margin-bottom: 20px; }
+    .modal-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.65; flex: 1; margin-bottom: 20px; white-space: pre-line; word-break: break-word; overflow-y: auto; max-height: 160px; }
 
     /* ── TOAST ── */
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--charcoal); color: white; border-radius: 50px; padding: 14px 28px; font-size: 1rem; z-index: 999; transition: transform 0.3s; }
@@ -256,11 +261,18 @@
 
 <section class="featured-section" id="featuredSection">
   <h2 class="section-title">✨ Destacados</h2>
-  <div class="slider-container" id="featuredSlider"></div>
+  <div class="featured-grid" id="featuredSlider"></div>
 </section>
 
 <div class="filters-bar" id="filtersBar">
   <button class="filter-btn active" data-cat="all">Todos</button>
+  <select class="sort-select" id="sortSelect" onchange="renderStore(window._allProducts || [])">
+    <option value="default">Ordenar: Recientes</option>
+    <option value="price-asc">Precio: menor a mayor</option>
+    <option value="price-desc">Precio: mayor a menor</option>
+    <option value="name-asc">Nombre: A → Z</option>
+    <option value="stock-desc">Más disponibles</option>
+  </select>
 </div>
 
 <section class="products-section" id="productos">
@@ -386,27 +398,35 @@ let activeCategory = 'all';
 let searchTerm = '';
 
 function renderCategories(products) {
-  // Categorías fijas de Yanbal en orden
+  // Categorías base de Yanbal en orden
   const yanbalCats = [
     'Perfumes', 'Maquillaje', 'Cuidado del Rostro', 'Cuidado del Cuerpo',
     'Joyería y Accesorios', 'Cabello', 'Nutrición y Bienestar', 'Para Hombres'
   ];
-  // Solo mostrar las que tienen productos activos en la tienda
-  const activeCats = new Set(products.map(p => p.category).filter(Boolean));
+  // Recoger todas las categorías (un producto puede tener varias en p.categories[])
+  const activeCats = new Set();
+  products.forEach(p => {
+    const cats = p.categories && p.categories.length ? p.categories : (p.category ? [p.category] : []);
+    cats.forEach(c => c && activeCats.add(c));
+  });
   const bar = document.getElementById('filtersBar');
-  // Eliminar botones anteriores (excepto "Todos")
+  // Eliminar botones anteriores (excepto "Todos" y el selector de ordenamiento)
   [...bar.querySelectorAll('[data-cat]:not([data-cat="all"])')].forEach(b => b.remove());
   const allBtn = bar.querySelector('[data-cat="all"]');
-  yanbalCats.forEach(cat => {
-    if (!activeCats.has(cat)) return; // solo mostrar si hay productos
+  // Primero las categorías base, luego las custom
+  const customCats = [...activeCats].filter(c => !yanbalCats.includes(c)).sort();
+  const ordered = [...yanbalCats, ...customCats];
+  ordered.forEach(cat => {
+    if (!activeCats.has(cat)) return;
     const btn = document.createElement('button');
     btn.className = 'filter-btn';
     btn.dataset.cat = cat;
     btn.textContent = cat;
     btn.onclick = () => setCategory(cat);
-    allBtn.after(btn); // se insertan después del botón "Todos"
+    // Insert before sort select
+    const sortSel = bar.querySelector('.sort-select');
+    bar.insertBefore(btn, sortSel);
   });
-  // Reinsertar "Todos" al principio
   bar.prepend(allBtn);
 }
 
@@ -465,20 +485,40 @@ function renderStore(products) {
   const grid = document.getElementById('productsGrid');
   const slider = document.getElementById('featuredSlider');
   const featSec = document.getElementById('featuredSection');
+  const sortVal = document.getElementById('sortSelect')?.value || 'default';
 
+  // Destacados: tarjetas compactas al tope (solo cuando no hay filtro activo)
   const featured = products.filter(p => p.featured);
   if(featured.length && activeCategory === 'all' && !searchTerm) {
     featSec.style.display = 'block';
-    slider.innerHTML = featured.map(buildProductCard).join('');
+    slider.innerHTML = featured.map(p => {
+      const img = p.imageUrls && p.imageUrls.length ? p.imageUrls[0] : (p.imageUrl || 'https://via.placeholder.com/80');
+      return `
+        <div class="featured-mini-card" onclick="openModal('${p.id}')">
+          <img class="featured-mini-img" src="${img}" alt="${p.name}" />
+          <div class="featured-mini-info">
+            <div class="featured-mini-name">${p.name}</div>
+            <div class="featured-mini-price">${fmtPrice(p.price)}</div>
+          </div>
+        </div>`;
+    }).join('');
   } else {
     featSec.style.display = 'none';
   }
 
+  // Filtrar: un producto aparece si alguna de sus categorías coincide
   let filtered = products.filter(p => {
-    const matchCat = activeCategory === 'all' || p.category === activeCategory;
+    const cats = p.categories && p.categories.length ? p.categories : (p.category ? [p.category] : []);
+    const matchCat = activeCategory === 'all' || cats.includes(activeCategory);
     const matchSearch = !searchTerm || p.name.toLowerCase().includes(searchTerm) || (p.description || '').toLowerCase().includes(searchTerm);
     return matchCat && matchSearch;
   });
+
+  // Ordenar
+  if (sortVal === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+  else if (sortVal === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+  else if (sortVal === 'name-asc') filtered.sort((a, b) => a.name.localeCompare(b.name));
+  else if (sortVal === 'stock-desc') filtered.sort((a, b) => (b.stock || 0) - (a.stock || 0));
 
   if (filtered.length === 0) {
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:gray;">No se encontraron productos.</div>`;

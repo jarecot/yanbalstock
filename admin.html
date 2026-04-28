@@ -69,6 +69,11 @@
     .toggle::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: white; top: 3px; left: 3px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .toggle.on::after { left: 23px; }
 
+    /* Category checkboxes */
+    .cat-chip { display:flex; align-items:center; gap:6px; background:white; border:1.5px solid #ddd; border-radius:50px; padding:6px 14px; cursor:pointer; user-select:none; transition:0.15s; font-size:0.9rem; }
+    .cat-chip input[type=checkbox] { width:15px; height:15px; accent-color:var(--rose); cursor:pointer; }
+    .cat-chip:has(input:checked) { border-color:var(--rose); background:var(--rose-pale); color:var(--rose); font-weight:500; }
+
     /* Login */
     #loginScreen { position: fixed; inset: 0; z-index: 999; background: linear-gradient(135deg, #1a0f0d, #3d2820); display: flex; align-items: center; justify-content: center; }
     .login-box { background: white; border-radius: 20px; padding: 48px; width: 380px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5);}
@@ -202,18 +207,13 @@
 
     <div class="fg"><label>Nombre del Producto *</label><input type="text" id="fName" /></div>
 
-    <div class="form-group" style="margin-bottom: 15px;">
-  <label style="display:block; margin-bottom:5px; font-weight:600;">Categoría</label>
-  <select id="pCategory" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-    <option value="Perfumes">Perfumes</option>
-    <option value="Maquillaje">Maquillaje</option>
-    <option value="Cuidado del Rostro">Cuidado del Rostro</option>
-    <option value="Cuidado del Cuerpo">Cuidado del Cuerpo</option>
-    <option value="Joyería y Accesorios">Joyería y Accesorios</option>
-    <option value="Cabello">Cabello</option>
-    <option value="Nutrición y Bienestar">Nutrición y Bienestar</option>
-    <option value="Para Hombres">Para Hombres</option>
-  </select>
+    <div class="fg" style="margin-bottom: 18px;">
+  <label style="display:block; margin-bottom:8px; font-weight:600;">Categorías <span style="font-weight:400;color:var(--muted);font-size:0.85rem;">(puedes marcar varias)</span></label>
+  <div id="categoriesCheckboxList" style="display:flex; flex-wrap:wrap; gap:10px; padding:14px; background:var(--cream); border-radius:10px; border:1.5px solid #e0d4d0; min-height:60px;"></div>
+  <div style="display:flex;gap:8px;margin-top:10px;">
+    <input type="text" id="newCatInput" placeholder="Nueva categoría…" style="flex:1;padding:9px 12px;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:0.95rem;" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomCategory();}" />
+    <button type="button" onclick="addCustomCategory()" style="background:var(--rose);color:white;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;font-weight:600;white-space:nowrap;">+ Agregar</button>
+  </div>
 </div>
     
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
@@ -501,7 +501,7 @@
     editingId = null; currentImages = []; renderImgList();
     document.getElementById('formTitle').textContent = '➕ Nuevo Producto';
     ['fName','fPrice','fOriginalPrice','fStock','fDesc'].forEach(i => document.getElementById(i).value='');
-    document.getElementById('pCategory').value = 'Perfumes';
+    renderCategoryCheckboxes([]);
     document.getElementById('fActive').classList.add('on');
     document.getElementById('fFeatured').classList.remove('on');
     document.getElementById('productFormOverlay').classList.add('open');
@@ -515,9 +515,10 @@
     
     document.getElementById('formTitle').textContent = '✏️ Editar Producto';
     document.getElementById('fName').value = p.name;
-    document.getElementById('fPrice').value = p.price;
-    document.getElementById('pCategory').value = p.category || '';
+    const selectedCats = p.categories || (p.category ? [p.category] : []);
+    renderCategoryCheckboxes(selectedCats);
     document.getElementById('fOriginalPrice').value = p.originalPrice || '';
+    document.getElementById('fPrice').value = p.price;
     document.getElementById('fStock').value = p.stock || 0;
     document.getElementById('fDesc').value = p.description || '';
     document.getElementById('fActive').classList.toggle('on', !!p.active);
@@ -529,7 +530,8 @@ window.saveProduct = async () => {
     const name = document.getElementById('fName').value.trim();
     const price = parseFloat(document.getElementById('fPrice').value);
     const stock = parseInt(document.getElementById('fStock').value);
-    const category = document.getElementById('pCategory').value; // <--- ESTO: Captura la opción elegida
+    const categories = getSelectedCategories();
+    const category = categories[0] || ''; // backward compat: first cat as main
     
     if(!name || isNaN(price) || isNaN(stock)) {
       alert("Por favor completa Nombre, Precio y Stock.");
@@ -539,7 +541,8 @@ window.saveProduct = async () => {
     const data = {
       name,
       price,
-      category, // <--- ESTO: Agregamos la categoría al paquete de datos
+      categories, // array of categories
+      category,   // keep for backward compat
       originalPrice: parseFloat(document.getElementById('fOriginalPrice').value) || null,
       stock,
       description: document.getElementById('fDesc').value,
@@ -586,6 +589,48 @@ window.saveProduct = async () => {
       }
     } catch(err) { alert("Error subiendo imagen. Verifica tu conexión o la API Key."); }
     e.target.value = ''; // Reset input file
+  };
+
+  // --- GESTIÓN DE CATEGORÍAS ---
+  const DEFAULT_CATS = [
+    'Perfumes', 'Maquillaje', 'Cuidado del Rostro', 'Cuidado del Cuerpo',
+    'Joyería y Accesorios', 'Cabello', 'Nutrición y Bienestar', 'Para Hombres'
+  ];
+  let customCats = JSON.parse(localStorage.getItem('maida_custom_cats') || '[]');
+
+  function getAllCats() {
+    return [...DEFAULT_CATS, ...customCats.filter(c => !DEFAULT_CATS.includes(c))];
+  }
+
+  function renderCategoryCheckboxes(selected = []) {
+    const container = document.getElementById('categoriesCheckboxList');
+    container.innerHTML = getAllCats().map(cat => `
+      <label class="cat-chip">
+        <input type="checkbox" value="${cat}" ${selected.includes(cat) ? 'checked' : ''} />
+        ${cat}
+      </label>
+    `).join('');
+  }
+
+  function getSelectedCategories() {
+    return [...document.querySelectorAll('#categoriesCheckboxList input[type=checkbox]:checked')].map(cb => cb.value);
+  }
+
+  window.addCustomCategory = () => {
+    const input = document.getElementById('newCatInput');
+    const val = input.value.trim();
+    if (!val) return;
+    if (getAllCats().map(c => c.toLowerCase()).includes(val.toLowerCase())) {
+      showToast('⚠️ Esa categoría ya existe');
+      return;
+    }
+    customCats.push(val);
+    localStorage.setItem('maida_custom_cats', JSON.stringify(customCats));
+    const currentSelected = getSelectedCategories();
+    currentSelected.push(val);
+    renderCategoryCheckboxes(currentSelected);
+    input.value = '';
+    showToast(`✅ Categoría "${val}" creada`);
   };
 
   function fmtPrice(n) { return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n||0); }
